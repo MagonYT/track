@@ -1,1 +1,1 @@
-number = "PHONE_NUMBER"
+# This has become obselete in the newest version, Please delete.
