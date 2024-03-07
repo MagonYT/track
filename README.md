@@ -2,13 +2,11 @@
 **A simple project for tracking the phone number country and serviece 💻**
 # How to use it? 🤔
 - **``pip install phonenumbers``**
-- **Fill ``pn.py``**
 - **``python track.py``**
+- **Input the phone number with the country code**
+- **Example (Applies to any area code): +1 123-456-7890**
 
 **Be sure to give this repo a star ⭐**
 # Support and credit ✒
 **Developer : [DevEvil](https://devevil.com)** 💻
-
-**Donate (Iranian Users Only) : [IDPay](https://idpay.ir/devevil)** ❤
-
-**Patreon Soon**
+**Revamped : [Magon](https://magon.lol)** 💻
