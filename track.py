@@ -1,6 +1,7 @@
 from phonenumbers import carrier
 import phonenumbers
-from pn import number
+
+number = input("Input Number (INCLUDE AREA CODE): ")
 
 from phonenumbers import geocoder
 ch_number = phonenumbers.parse(number, "CH")
