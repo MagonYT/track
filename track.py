@@ -1,64 +1,77 @@
 import phonenumbers
-from phonenumbers import carrier, geocoder, timezone, PhoneNumberFormat, number_type
+from phonenumbers import carrier, geocoder, timezone, PhoneNumberFormat
 from phonenumbers.phonenumberutil import NumberParseException
-from colorama import init, Fore, Style
+from colorama import init, Fore
 import time
 
 init(autoreset=True)
 
-def format_number_info(number_str):
+known_disposable_carriers = {
+    "Stour Marine", "Voxbone", "Bandwidth", "Twilio", "Tyntec", "Onvoy", "Plivo", "Level 3", "Vonage",
+    "Google", "Skype", "TextNow", "Hushed", "Burner"
+}
+
+def analyze_number(number_str):
     try:
-        parsed = phonenumbers.parse(number_str, None)
+        parsed = phonenumbers.parse(number_str.strip(), None)
 
         if not phonenumbers.is_possible_number(parsed):
             return Fore.RED + "❌ Not a possible number."
         if not phonenumbers.is_valid_number(parsed):
             return Fore.RED + "❌ Not a valid number."
 
-        info = {
+        num_format = {
             "International Format": phonenumbers.format_number(parsed, PhoneNumberFormat.INTERNATIONAL),
             "National Format": phonenumbers.format_number(parsed, PhoneNumberFormat.NATIONAL),
             "E.164 Format": phonenumbers.format_number(parsed, PhoneNumberFormat.E164),
-            "Type": phonenumbers.number_type(parsed),
-            "Carrier": carrier.name_for_number(parsed, "en") or "Unknown",
-            "Region": geocoder.description_for_number(parsed, "en") or "Unknown",
-            "Time Zones": ', '.join(timezone.time_zones_for_number(parsed)) or "Unknown"
         }
 
-        type_map = {
-            0: "FIXED_LINE",
-            1: "MOBILE",
-            2: "FIXED_LINE_OR_MOBILE",
-            3: "TOLL_FREE",
-            4: "PREMIUM_RATE",
-            5: "SHARED_COST",
-            6: "VOIP",
-            7: "PERSONAL_NUMBER",
-            8: "PAGER",
-            9: "UAN",
-            10: "VOICEMAIL",
-            27: "UNKNOWN"
+        num_type_map = {
+            0: "FIXED_LINE", 1: "MOBILE", 2: "FIXED_LINE_OR_MOBILE",
+            3: "TOLL_FREE", 4: "PREMIUM_RATE", 5: "SHARED_COST",
+            6: "VOIP", 7: "PERSONAL_NUMBER", 8: "PAGER", 9: "UAN",
+            10: "VOICEMAIL", 27: "UNKNOWN"
         }
 
-        output = Fore.GREEN + "✅ Number Analysis:\n"
-        for key, value in info.items():
-            if key == "Type":
-                value = type_map.get(value, "UNKNOWN")
-            output += f"{Fore.CYAN}{key}: {Fore.YELLOW}{value}\n"
+        number_type = phonenumbers.number_type(parsed)
+        number_type_str = num_type_map.get(number_type, "UNKNOWN")
+
+        num_carrier = carrier.name_for_number(parsed, "en") or "Unknown"
+        num_region = geocoder.description_for_number(parsed, "en") or "Unknown"
+        num_tz = ', '.join(timezone.time_zones_for_number(parsed)) or "Unknown"
+
+        is_voip = number_type == 6 or num_carrier in known_disposable_carriers
+        is_disposable = "Yes" if num_carrier in known_disposable_carriers else "No"
+
+        output = Fore.GREEN + "\n✅ Number Analysis:\n"
+        for k, v in num_format.items():
+            output += f"{Fore.CYAN}{k}: {Fore.YELLOW}{v}\n"
+        output += f"{Fore.CYAN}Type: {Fore.YELLOW}{number_type_str}\n"
+        output += f"{Fore.CYAN}Carrier: {Fore.YELLOW}{num_carrier}\n"
+        output += f"{Fore.CYAN}Region: {Fore.YELLOW}{num_region}\n"
+        output += f"{Fore.CYAN}Time Zones: {Fore.YELLOW}{num_tz}\n"
+        output += f"{Fore.CYAN}VoIP/Disposable: {Fore.YELLOW}{is_disposable} ({'Likely VOIP' if is_voip else 'Normal'})\n"
+
         return output
 
     except NumberParseException as e:
         return Fore.RED + f"❌ Error: {e}"
 
+
 def main():
+    print(Fore.MAGENTA + "📞 Enter one or more phone numbers, separated by commas.\nExample: +44 7537135157, +1 2025550198\n")
+
     while True:
-        number_input = input(Fore.MAGENTA + "\n📞 Input Number (with area code, or 'exit' to quit): ")
-        if number_input.strip().lower() == 'exit':
-            print(Fore.GREEN + "Exiting. Goodbye!")
+        raw_input = input(Fore.MAGENTA + "\n📥 Input Number(s) or 'exit': ")
+        if raw_input.lower().strip() == 'exit':
+            print(Fore.GREEN + "✅ Done.")
             break
 
-        print(format_number_info(number_input))
-        time.sleep(1)
+        numbers = [n.strip() for n in raw_input.split(',') if n.strip()]
+        for num in numbers:
+            print(analyze_number(num))
+            time.sleep(0.5)
+
 
 if __name__ == "__main__":
     main()
