@@ -1,5 +1,6 @@
 from phonenumbers import carrier
 import phonenumbers
+import time
 
 number = input("Input Number (INCLUDE AREA CODE): ")
 
@@ -11,4 +12,5 @@ print(geocoder.description_for_number(ch_number, "en"))
 service_number = phonenumbers.parse(number, "RO")
 print(carrier.name_for_number(service_number, "en"))
 
-# Copyright 2022 DevEvil.xyz
+
+time.sleep(5)
